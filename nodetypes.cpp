@@ -68,3 +68,44 @@ void SigmoidNode::forward()
 	output = z;
 	partialDerivatives = { z*(1.0f-z) };
 }
+
+// ---------------------- Vector Multiplication Node ----------------------
+
+VectorMultNode::VectorMultNode(std::vector<Node*> inputs, std::vector<Node*> weights)
+{
+	if(inputs.size() != weights.size())
+	{
+		throw new std::exception();
+	}
+
+	for(auto n : inputs)
+	{
+		parents.push_back(n);
+		n->children.push_back(this);
+	}
+
+	for(auto w : weights)
+	{
+		parents.push_back(w);
+		w->children.push_back(this);
+	}
+	partialDerivatives.resize(parents.size());
+}
+
+void VectorMultNode::forward()
+{
+	output = 0;
+	unsigned l = parents.size() / 2;
+
+	float x,w;
+	for(unsigned i = 0; i < l; ++i)
+	{
+		x = parents.at(i)->getResult();
+		w = parents.at(l+i)->getResult();
+		
+		output += x*w;
+
+		partialDerivatives.at(i) = w;
+		partialDerivatives.at(l+i) = x;
+	}
+}

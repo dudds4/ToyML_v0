@@ -16,29 +16,25 @@ struct InputNode : public Node
 struct AdditionNode : public Node
 {
 	AdditionNode(Node* a, Node* b);
-
-	void forward();
+	virtual void forward();
 };
 
 struct MultiplicationNode : public Node
 {
 	MultiplicationNode(Node* a, Node* b);
-	void forward();
+	virtual void forward();
 };
 
-// struct MatrixMultNode : public Node
-// {
-// 	MatrixMultNode(std::vector<Node*> inputs, std::vector<Node*> weights)
-// 	{
-// 		parents.push_back(p);
-// 		p->children.push_back(this);
-// 	}	
-// };
+struct VectorMultNode : public Node
+{
+	VectorMultNode(std::vector<Node*> inputs, std::vector<Node*> weights);
+	virtual void forward();
+};
 
 struct SigmoidNode : public Node
 {
 	SigmoidNode(Node* p);
-	void forward();
+	virtual void forward();
 };
 
 #endif // NODETYPES_H

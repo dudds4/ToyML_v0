@@ -45,10 +45,12 @@ int main()
 	InputNode x1, x2;
 	InputNode w1, w2;
 
-	MultiplicationNode m1(&x1, &w1);
-	MultiplicationNode m2(&x2, &w2);
+	// MultiplicationNode m1(&x1, &w1);
+	// MultiplicationNode m2(&x2, &w2);
 
-	AdditionNode a(&m1, &m2);
+	// AdditionNode a(&m1, &m2);
+
+	VectorMultNode a({&x1, &x2}, {&w1, &w2});
 
 	SigmoidNode s(&a);
 
