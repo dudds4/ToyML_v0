@@ -15,7 +15,7 @@ struct Node
 	bool executed = false;
 	bool derivated = false;
 
-	float getResult(int i);
+	float getResult();
 	float getDerivative(int index);
 	float getDerivative(Node* n);
 	void computeDerivatives();
@@ -23,7 +23,7 @@ struct Node
 	bool isReadyBackward();
 
 protected:
-	std::vector<float> outputs;
+	float output;
 	std::vector<float> derivatives;
 	std::vector<float> partialDerivatives;
 };

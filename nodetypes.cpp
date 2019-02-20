@@ -3,17 +3,16 @@
 
 // ---------------------- Input Node ----------------------
 
-InputNode::InputNode() { outputs.push_back(0); }
-InputNode::InputNode (float i) { outputs.push_back(i); }
+InputNode::InputNode() { output=0; }
+InputNode::InputNode (float i) { output = i; }
 
-void InputNode::setInput(float i) { outputs.at(0) = i; }
-float InputNode::getInput() { return outputs.at(0); }
+void InputNode::setInput(float i) { output = i; }
+float InputNode::getInput() { return output; }
 void InputNode::forward() { partialDerivatives = {1}; }
 
 // ---------------------- Addition Node ----------------------
 
-AdditionNode::AdditionNode(Node* a, Node* b, int indexA, int indexB)
-: iA(indexA), iB(indexB)
+AdditionNode::AdditionNode(Node* a, Node* b)
 {
 	parents.push_back(a);
 	parents.push_back(b);
@@ -21,19 +20,18 @@ AdditionNode::AdditionNode(Node* a, Node* b, int indexA, int indexB)
 	a->children.push_back(this);
 	b->children.push_back(this);
 
-	outputs.push_back(0);
+	output = 0;
 }
 
 void AdditionNode::forward() 
 { 
-	outputs.at(0) = parents.at(0)->getResult(iA) + parents.at(1)->getResult(iB);
+	output = parents.at(0)->getResult() + parents.at(1)->getResult();
 	partialDerivatives = {1, 1};
 }
 
 // ---------------------- Multiplication Node ----------------------
 
-MultiplicationNode::MultiplicationNode(Node* a, Node* b, int indexA, int indexB)
-: iA(indexA), iB(indexB)
+MultiplicationNode::MultiplicationNode(Node* a, Node* b)
 {
 	parents.push_back(a);
 	parents.push_back(b);
@@ -41,33 +39,32 @@ MultiplicationNode::MultiplicationNode(Node* a, Node* b, int indexA, int indexB)
 	a->children.push_back(this);
 	b->children.push_back(this);
 
-	outputs.push_back(0);
+	output = 0;
 }
 
 void MultiplicationNode::forward() 
 {
-	float x = parents.at(0)->getResult(iA);
-	float y = parents.at(1)->getResult(iB);
+	float x = parents.at(0)->getResult();
+	float y = parents.at(1)->getResult();
 	
-	outputs.at(0) = x * y;
+	output = x * y;
 	partialDerivatives = {y, x};
 }
 
 // ---------------------- Sigmoid Node ----------------------
 
-SigmoidNode::SigmoidNode(Node* p, int index)
-: pIndex(index)
+SigmoidNode::SigmoidNode(Node* p)
 {
 	parents.push_back(p);
 	p->children.push_back(this);
-	outputs.push_back(0);
+	output = 0;
 }
 
 void SigmoidNode::forward() 
 {
-	float x = parents.at(0)->getResult(pIndex);
+	float x = parents.at(0)->getResult();
 	float z = 1.0f / (1.0f + exp(-1.0f*x));
 	
-	outputs.at(0) = z;
+	output = z;
 	partialDerivatives = { z*(1.0f-z) };
 }

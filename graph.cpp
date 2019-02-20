@@ -16,7 +16,7 @@ T takeFirst(std::vector<T> &v)
 
 // Node implementations
 
-float Node::getResult(int i) { return outputs.at(i); }
+float Node::getResult() { return output; }
 float Node::getDerivative(int index) { return derivatives.at(index); }
 float Node::getDerivative(Node* n)
 {
@@ -90,7 +90,7 @@ void Graph::setInputs(const std::vector<float> &inputs)
 
 float Graph::getOutput(int i, int j)
 {
-	return outputNodes.at(i)->getResult(j);
+	return outputNodes.at(i)->getResult();
 }
 
 void Graph::traverse()

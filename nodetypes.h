@@ -15,23 +15,15 @@ struct InputNode : public Node
 
 struct AdditionNode : public Node
 {
-	AdditionNode(Node* a, Node* b, int indexA=0, int indexB=0);
+	AdditionNode(Node* a, Node* b);
 
 	void forward();
-
-private:
-	int iA;
-	int iB;
 };
 
 struct MultiplicationNode : public Node
 {
-	MultiplicationNode(Node* a, Node* b, int indexA=0, int indexB=0);
+	MultiplicationNode(Node* a, Node* b);
 	void forward();
-
-private:
-	int iA;
-	int iB;
 };
 
 // struct MatrixMultNode : public Node
@@ -45,11 +37,8 @@ private:
 
 struct SigmoidNode : public Node
 {
-	SigmoidNode(Node* p, int index=0);
+	SigmoidNode(Node* p);
 	void forward();
-
-private:
-	int pIndex;
 };
 
 #endif // NODETYPES_H
