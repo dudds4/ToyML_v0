@@ -3,19 +3,24 @@ RM = rm -f
 CC = g++
 CFLAGS = -O2 -std=c++14
 
-HDRS = main.h graph.h nodetypes.h
-SRCS = main.cpp graph.cpp nodetypes.cpp
+LIBHDRS = graph.h nodetypes.h
+LIBSRCS = graph.cpp nodetypes.cpp
 
-all: app
+MSRCS = main.cpp
+TSRCS = tests.cpp
 
-app: bin bin/toyml
+all: bin bin/toyml bin/tests
 
 bin:
 	mkdir bin
 
-bin/toyml: ${SRCS}
-	@printf "Compiling toy ml\n"
-	$(CC) ${SRCS} $(CFLAGS) -o bin/toyml
+bin/toyml: ${MSRCS} ${LIBHDRS} ${LIBSRCS}
+	@printf "Compiling toyml\n"
+	$(CC) ${MSRCS} ${LIBSRCS} $(CFLAGS) -o bin/toyml
+
+bin/tests: ${TSRCS} ${LIBHDRS} ${LIBSRCS}
+	@printf "Compiling tests\n"
+	$(CC) ${TSRCS} ${LIBSRCS} $(CFLAGS) -o bin/tests
 
 clean:
 	$(RM) -r bin
