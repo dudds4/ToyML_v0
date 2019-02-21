@@ -7,6 +7,7 @@
 #include <vector>
 #include <memory>
 #include <exception>
+#include <iostream>
 
 struct InputNodeSet
 {
@@ -43,6 +44,18 @@ struct InputNodeSet
 		
 		auto ptr = inputs.get();
 		for(unsigned i = 0; i < m_size; ++i)
+			r.push_back(ptr+i);
+
+		return r;
+	}
+
+	std::vector<Node*> getNodes(int l, int h)
+	{
+		std::vector<Node*> r;
+		r.reserve(m_size);
+		
+		auto ptr = inputs.get();
+		for(unsigned i = l; i < m_size && i < h; ++i)
 			r.push_back(ptr+i);
 
 		return r;
@@ -110,6 +123,12 @@ struct Layer
 			throw new std::exception();
 
 		auto cols = numInputs;
+
+		if(w.size() != cols)
+		{
+			std::cout << "size of vector w did not match number of weights in row" << std::endl;
+			throw new std::exception();
+		}
 
 		for(int c = 0; c < cols; c++)
 			weights.at(row*cols + c).setInput(w.at(c));
