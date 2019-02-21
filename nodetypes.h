@@ -27,8 +27,10 @@ struct MultiplicationNode : public Node
 
 struct VectorMultNode : public Node
 {
+	VectorMultNode();
 	VectorMultNode(std::vector<Node*> inputs, std::vector<Node*> weights);
 	virtual void forward();
+	void setInputs(std::vector<Node*> inputs, std::vector<Node*> weights);
 };
 
 struct SigmoidNode : public Node

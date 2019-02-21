@@ -1,9 +1,9 @@
 RM = rm -f
 
 CC = g++
-CFLAGS = -O2 -std=c++14
+CFLAGS = -O2 -std=c++17
 
-LIBHDRS = graph.h nodetypes.h
+LIBHDRS = graph.h nodetypes.h layers.h
 LIBSRCS = graph.cpp nodetypes.cpp
 
 MSRCS = main.cpp

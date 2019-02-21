@@ -71,6 +71,40 @@ void SigmoidNode::forward()
 
 // ---------------------- Vector Multiplication Node ----------------------
 
+VectorMultNode::VectorMultNode() {}
+
+void VectorMultNode::setInputs(std::vector<Node*> inputs, std::vector<Node*> weights)
+{
+	if(inputs.size() != weights.size())
+	{
+		throw new std::exception();
+	}
+
+	// remove self from parents...
+	for(auto p : parents)
+	{
+		p->children.erase(
+			std::remove(p->children.begin(), p->children.end(), this),
+			p->children.end());
+	}
+
+	parents.clear();
+
+	for(auto n : inputs)
+	{
+		parents.push_back(n);
+		n->children.push_back(this);
+	}
+
+	for(auto w : weights)
+	{
+		parents.push_back(w);
+		w->children.push_back(this);
+	}
+
+	partialDerivatives.resize(parents.size());
+}
+
 VectorMultNode::VectorMultNode(std::vector<Node*> inputs, std::vector<Node*> weights)
 {
 	if(inputs.size() != weights.size())

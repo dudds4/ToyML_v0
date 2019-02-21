@@ -79,12 +79,43 @@ bool Node::isReadyBackward()
 bool nodeReadyFwd(Node* a, Node* b) { return a->isReadyForward() && !b->isReadyForward(); }
 bool nodeReadyBwd(Node* a, Node* b) { return a->isReadyBackward() && !b->isReadyBackward(); }
 
-void Graph::setInputs(const std::vector<float> &inputs)
+void Graph::addInputNodes(const std::vector<InputNode*> &inputs)
 {
-	unsigned s = std::min(inputs.size(), inputNodes.size());
+	inputNodes.insert(inputNodes.end(), inputs.begin(), inputs.end());
+}
+
+void Graph::addParamNodes(const std::vector<InputNode*> &params)
+{
+	paramNodes.insert(paramNodes.end(), params.begin(), params.end());
+}
+
+void copyValuesToInputNodes(const std::vector<float> &values, std::vector<InputNode*> &nodes)
+{
+	unsigned s = std::min(nodes.size(), values.size());
 	for(unsigned i = 0; i < s; ++i)
 	{
-		inputNodes.at(i)->setInput(inputs.at(i));
+		nodes.at(i)->setInput(values.at(i));
+	}	
+}
+
+void Graph::setInputs(const std::vector<float> &values)
+{
+	copyValuesToInputNodes(values, inputNodes);
+}
+
+void Graph::setParams(const std::vector<float> &values)
+{
+	copyValuesToInputNodes(values, paramNodes);
+}
+
+
+void Graph::updateParams(std::function<float(float,float)> update )
+{
+	for(auto node : paramNodes)
+	{
+		float w = node->getInput();
+		float deriv = node->getDerivative(0);
+		node->setInput(update(w, deriv));
 	}
 }
 
@@ -101,29 +132,36 @@ void Graph::traverse()
 	for(auto n : inputNodes)
 		q.push_back(n);
 
+	for(auto n : paramNodes)
+		q.push_back(n);
+
 	while(q.size())
 	{
 		auto n = takeFirst(q);
 
-		if(n->isReadyForward())
+		if(!n->executed)
 		{
-			n->forward();
-			n->executed = true;
-			for(auto c : n->children)
-				q.push_back(c);
-		}
-		else
-		{
-			// pretty sure this is unreachable with current architecture & declarative flow
-			// as such its kind of untested, but in theory it should work				
-			std::cout << "traverse had to sort!" << std::endl;
+			if(n->isReadyForward())
+			{
+				n->forward();
+				n->executed = true;
+				for(auto c : n->children)
+					q.push_back(c);
+			}
+			else
+			{
+				// pretty sure this is unreachable with current architecture & declarative flow
+				// as such its kind of untested, but in theory it should work				
+				std::cout << "traverse had to sort!" << std::endl;
 
-			// move the ready nodes to the front of the queue
-			std::sort(q.begin(), q.end(), nodeReadyFwd);
+				// move the ready nodes to the front of the queue
+				std::sort(q.begin(), q.end(), nodeReadyFwd);
 
-			// add our node back into the queue
-			q.push_back(n);
+				// add our node back into the queue
+				q.push_back(n);
+			}			
 		}
+
 	}
 }
 
@@ -163,7 +201,11 @@ void Graph::backProp(int index)
 void Graph::traverseNodes( std::function<void(Node*)> visit )
 {
 	std::queue<Node*> q;
+	
 	for(auto n : inputNodes)
+		q.push(n);
+
+	for(auto n : paramNodes)
 		q.push(n);
 
 	while(q.size())

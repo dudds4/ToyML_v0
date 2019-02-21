@@ -33,9 +33,16 @@ struct InputNode;
 struct Graph
 {
 	std::vector<InputNode*> inputNodes;
+	std::vector<InputNode*> paramNodes;
 	std::vector<Node*> outputNodes;
 
-	void setInputs(const std::vector<float> &inputs);
+	void addInputNodes(const std::vector<InputNode*> &inputs);
+	void addParamNodes(const std::vector<InputNode*> &inputs);
+
+	void setInputs(const std::vector<float> &values);
+	void setParams(const std::vector<float> &values);
+	void updateParams(std::function<float(float,float)> update );
+
 	float getOutput(int i=0, int j=0);
 	void traverse();
 	void backProp(int index);
