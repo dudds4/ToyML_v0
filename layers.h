@@ -9,18 +9,33 @@
 #include <exception>
 #include <iostream>
 
-struct InputNodeSet
+template<typename NodeT>
+struct NodeSet
 {
-	InputNodeSet(unsigned size)
+	NodeSet(unsigned size)
 	: m_size(size)
 	{
 		if(!size)
 			throw new std::exception();
 
-		inputs = std::shared_ptr<InputNode[]>(new InputNode[size]);
+		inputs = std::shared_ptr<NodeT[]>(new NodeT[size]);
 	}
 
-	InputNode& at(size_t index)
+	NodeSet(const std::vector<Node*> &parents)
+	: m_size(parents.size())
+	{
+		if(!m_size)
+			throw new std::exception();
+
+		inputs = std::shared_ptr<NodeT[]>(new NodeT[m_size]);
+		
+		for(unsigned i = 0; i < m_size; ++i)
+		{
+			inputs[i].setParents({parents.at(i)});
+		}
+	}
+
+	NodeT& at(size_t index)
 	{
 		if(index > m_size)
 			throw new std::exception();
@@ -28,7 +43,7 @@ struct InputNodeSet
 		return inputs[index];
 	}
 
-	InputNode* ptrAt(size_t index)
+	NodeT* ptrAt(size_t index)
 	{
 		if(index > m_size)
 			throw new std::exception();
@@ -61,9 +76,9 @@ struct InputNodeSet
 		return r;
 	}
 
-	std::vector<InputNode*> getInputs()
+	std::vector<NodeT*> getInputs()
 	{
-		std::vector<InputNode*> r;
+		std::vector<NodeT*> r;
 		r.reserve(m_size);
 		
 		auto ptr = inputs.get();
@@ -74,33 +89,39 @@ struct InputNodeSet
 	}
 
 private:
-	std::shared_ptr<InputNode[]> inputs;
+	std::shared_ptr<NodeT[]> inputs;
 	unsigned m_size;
 };
 
-struct Layer
+struct LinearLayer
 {
-	Layer(std::vector<Node*> inputs, size_t nOutputs)
+	LinearLayer(const std::vector<Node*>& inputs, size_t nOutputs)
 	: m_inputs(inputs)
-	, numInputs(inputs.size())
+	, numInputs(inputs.size() + 1)
 	, numOutputs(nOutputs)
-	, weights(inputs.size()*nOutputs)
+	, weights((inputs.size()+1)*nOutputs)
+	, bias(1)
 	{
 		if(!inputs.size())
 			throw new std::exception();
 
+		m_inputs.push_back(&bias);
+
+		vectorNodes = std::shared_ptr<VectorMultNode[]>(new VectorMultNode[nOutputs]);
+
 		unsigned cols = numInputs;
-
-		nodes = std::shared_ptr<VectorMultNode[]>(new VectorMultNode[nOutputs]);
-
 		for(unsigned r = 0; r < numOutputs; ++r)
 		{
 			std::vector<Node*> w;
 			for(unsigned c = 0; c < cols; ++c)
 				w.push_back(weights.ptrAt(r*cols + c));
 
-			nodes[r].setInputs(inputs, w);
+			vectorNodes[r].setInputs(m_inputs, w);
 		}
+
+		// set bias.executed to always be true
+		// then it doesn't need to be part of the graph
+		bias.executed = true;
 	}
 
 	std::vector<InputNode*> getWeightNodes()
@@ -112,10 +133,12 @@ struct Layer
 	{
 		std::vector<Node*> result;
 		for(size_t i = 0; i < numOutputs; ++i)
-			result.push_back(nodes.get() + i);
+			result.push_back(vectorNodes.get() + i);
 		
 		return result;
 	}
+
+	InputNode* getBiasNode() { return &bias; }
 
 	void setWeights(unsigned row, std::vector<float> w)
 	{
@@ -134,11 +157,37 @@ struct Layer
 			weights.at(row*cols + c).setInput(w.at(c));
 	}
 
-private:
+protected:
 	std::vector<Node*> m_inputs;
 	size_t numOutputs, numInputs;
-	InputNodeSet weights;
-	std::shared_ptr<VectorMultNode[]> nodes;
+	NodeSet<InputNode> weights;
+	InputNode bias;
+	std::shared_ptr<VectorMultNode[]> vectorNodes;
+};
+
+template<typename ActivationNodeT>
+struct Layer : LinearLayer
+{
+	Layer(const std::vector<Node*>& inputs, size_t nOutputs)
+	: LinearLayer(inputs, nOutputs)
+	{
+		activationNodes = std::shared_ptr<ActivationNodeT[]>(new ActivationNodeT[nOutputs]);
+
+		for(unsigned i = 0; i < nOutputs; ++i)
+			activationNodes[i].setParent(vectorNodes.get() + i);
+	}
+
+	std::vector<Node*> getOutputNodes()
+	{
+		std::vector<Node*> result;
+		for(size_t i = 0; i < numOutputs; ++i)
+			result.push_back(activationNodes.get() + i);
+		
+		return result;
+	}
+
+private:
+	std::shared_ptr<ActivationNodeT[]> activationNodes;
 };
 
 #endif //LAYERS_H

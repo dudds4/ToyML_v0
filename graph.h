@@ -22,8 +22,11 @@ struct Node
 	bool isReadyForward();
 	bool isReadyBackward();
 
+	void setParent(Node* n);
+	void setParents(const std::vector<Node*> &parentV);
+
 protected:
-	float output;
+	float output = 0;
 	std::vector<float> derivatives;
 	std::vector<float> partialDerivatives;
 };

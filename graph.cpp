@@ -76,6 +76,46 @@ bool Node::isReadyBackward()
 	return ready;
 }
 
+
+void Node::setParent(Node* n)
+{
+	// remove self from parents...
+	for(auto p : parents)
+	{
+		p->children.erase(
+			std::remove(p->children.begin(), p->children.end(), this),
+			p->children.end());
+	}
+
+	parents.clear();
+	parents.push_back(n);
+	n->children.push_back(this);
+
+	partialDerivatives.resize(parents.size());
+}
+
+void Node::setParents(const std::vector<Node*> &parentV)
+{
+	// remove self from parents...
+	for(auto p : parents)
+	{
+		p->children.erase(
+			std::remove(p->children.begin(), p->children.end(), this),
+			p->children.end());
+	}
+
+	parents.clear();
+	parents.reserve(parentV.size());
+
+	for(auto n : parentV)
+	{
+		parents.push_back(n);
+		n->children.push_back(this);
+	}
+
+	partialDerivatives.resize(parents.size());	
+}
+
 bool nodeReadyFwd(Node* a, Node* b) { return a->isReadyForward() && !b->isReadyForward(); }
 bool nodeReadyBwd(Node* a, Node* b) { return a->isReadyBackward() && !b->isReadyBackward(); }
 
@@ -152,7 +192,7 @@ void Graph::traverse()
 			{
 				// pretty sure this is unreachable with current architecture & declarative flow
 				// as such its kind of untested, but in theory it should work				
-				std::cout << "traverse had to sort!" << std::endl;
+				// std::cout << "traverse had to sort!" << std::endl;
 
 				// move the ready nodes to the front of the queue
 				std::sort(q.begin(), q.end(), nodeReadyFwd);

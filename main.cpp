@@ -12,21 +12,22 @@ int main()
 	Graph graph;
 	
 	// inputs x1, x2
-	// biases b1, b2
 
-	InputNodeSet inputs(4);
+	NodeSet<InputNode> inputs(2);
 	graph.addInputNodes(inputs.getInputs());
 
-	Layer firstLayer(inputs.getNodes(0, 3), 2);
+	Layer<SigmoidNode> firstLayer(inputs.getNodes(0, 2), 2);
 
-	firstLayer.setWeights(0, {1,1,1});
-	firstLayer.setWeights(1, {1,1,1});
+	firstLayer.setWeights(0, {-0.2,0.2,0.1});
+	firstLayer.setWeights(1, {0.3,-0.2,0.1});
 
-	auto v = firstLayer.getOutputNodes();
-	v.push_back(inputs.getNodes(3,4).at(0));
+	auto v = firstLayer.getOutputNodes();	
+	// v.push_back(inputs.getNodes(3,4).at(0));
 
-	Layer secondLayer(v, 1);
+	Layer<SigmoidNode> secondLayer(v, 1);
 	secondLayer.setWeights(0, {1,1,1});
+
+	// graph.addInputNodes({firstLayer.getBiasNode(), secondLayer.getBiasNode()});
 
 	graph.addParamNodes(firstLayer.getWeightNodes());
 	graph.addParamNodes(secondLayer.getWeightNodes());
@@ -48,7 +49,7 @@ int main()
 	float lastOverallError = 9999999999;
 
 	// let's try and train this graph
-	for(int i = 0; i < 1000; ++i)
+	for(int i = 0; i < 10000; ++i)
 	{
 		float overallError = 0;
 		bool shouldPrint = i % 100 == 0;

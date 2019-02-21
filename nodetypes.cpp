@@ -52,12 +52,12 @@ void MultiplicationNode::forward()
 }
 
 // ---------------------- Sigmoid Node ----------------------
+SigmoidNode::SigmoidNode(){}
 
 SigmoidNode::SigmoidNode(Node* p)
 {
 	parents.push_back(p);
 	p->children.push_back(this);
-	output = 0;
 }
 
 void SigmoidNode::forward() 
@@ -80,22 +80,11 @@ void VectorMultNode::setInputs(std::vector<Node*> inputs, std::vector<Node*> wei
 		throw new std::exception();
 	}
 
-	// remove self from parents...
-	for(auto p : parents)
-	{
-		p->children.erase(
-			std::remove(p->children.begin(), p->children.end(), this),
-			p->children.end());
-	}
+	// setParents clears the previous parents vector
+	// and removes this from all the parents' children vectors
+	setParents(inputs);
 
-	parents.clear();
-
-	for(auto n : inputs)
-	{
-		parents.push_back(n);
-		n->children.push_back(this);
-	}
-
+	// then we add the weights as well
 	for(auto w : weights)
 	{
 		parents.push_back(w);

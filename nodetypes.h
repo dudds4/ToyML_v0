@@ -35,6 +35,7 @@ struct VectorMultNode : public Node
 
 struct SigmoidNode : public Node
 {
+	SigmoidNode();
 	SigmoidNode(Node* p);
 	virtual void forward();
 };
