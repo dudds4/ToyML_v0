@@ -6,25 +6,120 @@
 #include <cmath>
 #include <cstring>
 
-float squareLoss(float yout, float yexpected)
+struct SquareLoss
 {
-	return pow(yout - yexpected, 2);
-}
+	static float loss(float yout, float yexpected)
+	{
+		float x = yout - yexpected;
+		return x * x;
+	}
 
-float squareLossDeriv(float yout, float yexpected)
-{
-	return 2 * (yout - yexpected);
-}
-
+	static float derivative(float yout, float yexpected)
+	{
+		return 2 * (yout - yexpected);
+	}
+};
 
 typedef std::vector<float> floatset;
 
-void batchTrain(Graph& graph, floatset* inputs, floatset outputs, unsigned iterations)
+template<template<typename T> class OptimT, typename LossT>
+struct BatchOptimizer
+{
+	typedef OptimT<LossT> OptimizerT;
+
+	void setGraph(Graph *g) { 
+		graph = g;
+		nParams = graph->paramNodes.size();
+		paramDerivs.resize(nParams);
+	}
+
+	void setTrainingSet(std::vector<float> *in, float* out, unsigned n)
+	{ 
+		inputs = in;
+		outputs = out;
+		setSize = n;
+	}
+
+	void runEpochs(unsigned iterations) { for(int i = 0; i < iterations; ++i) runEpoch(); }
+
+	float forwardPass(unsigned j)
+	{
+		graph->setInputs(inputs[j]);
+		graph->traverse();
+		return graph->getOutput(0);
+	}
+
+	void updateParamsInterface() { static_cast<OptimizerT*>(this)->updateParams(); }
+
+	void runEpoch()
+	{
+		memset(paramDerivs.data(), 0, sizeof(float)*nParams);
+		float overallError = 0;
+
+		// compute summed derivative
+		for(unsigned j = 0; j < setSize; ++j)
+		{
+			float output = forwardPass(j);
+
+			overallError += LossT::loss(output, outputs[j]);
+			float baseDeriv = LossT::derivative(output, outputs[j]);
+
+			graph->backProp(0, baseDeriv);
+
+			for(unsigned k = 0; k < nParams; ++k)
+				paramDerivs[k] += graph->paramNodes[k]->getDerivative(0);
+
+		}
+
+		if(overallError > lastOverallError)
+			learningRate /= 2;
+
+		lastOverallError = overallError;
+
+		// update params
+		updateParamsInterface();
+	}
+
+	void setLearningRate(float r) { learningRate = r; } 
+
+protected:
+
+	Graph *graph;
+	std::vector<float> *inputs; 
+	float* outputs;
+	unsigned setSize;
+
+	float lastOverallError = 0;
+	float learningRate = 0.2;
+
+	std::vector<float> paramDerivs;
+	unsigned nParams;
+};
+
+
+template<typename LossT>
+struct GradientDescent : public BatchOptimizer<GradientDescent, LossT>
+{
+	void updateParams()
+	{
+		unsigned nParams = this->graph->paramNodes.size();
+
+		for(unsigned k = 0; k < nParams; ++k)
+		{
+			auto pNode = this->graph->paramNodes[k];
+			float w = pNode->getInput();
+			pNode->setInput(w - this->learningRate*this->paramDerivs[k]);
+		}		
+	}
+};
+
+template<typename LossT>
+void batchGradientDescent(Graph& graph, floatset* inputs, floatset expectedOutputs, unsigned iterations)
 {
 	unsigned nParams = graph.paramNodes.size();
 	float paramUpdates[nParams];
 	
-	unsigned n = outputs.size();
+	unsigned n = expectedOutputs.size();
 
 	float learningRate = 0.1*2;
 	float lastOverallError = 0;
@@ -42,8 +137,12 @@ void batchTrain(Graph& graph, floatset* inputs, floatset outputs, unsigned itera
 			graph.setInputs(inputs[j]);
 			graph.traverse();
 
-			overallError += squareLoss(graph.getOutput(0), outputs[j]);
-			float baseDeriv = squareLossDeriv(graph.getOutput(0), outputs[j]);
+			float output = graph.getOutput(0);
+
+			// overallError += ErrorFnc(output, expectedOutputs[j]);
+			// float baseDeriv = ErrorDerivFnc(output, expectedOutputs[j]);
+			overallError += LossT::loss(output, expectedOutputs[j]);
+			float baseDeriv = LossT::derivative(output, expectedOutputs[j]);
 
 			graph.backProp(0, baseDeriv);
 
@@ -114,9 +213,16 @@ int main()
 
 	floatset expectedOutputs = {0,1,1,0};
 
-	batchTrain(graph, inputValues, expectedOutputs, 10000);
+	unsigned iterations = 10000;
 
+	GradientDescent<SquareLoss> optimizer;
+	// GradientDescent optimizer;
+	optimizer.setGraph(&graph);
+	optimizer.setTrainingSet(inputValues, expectedOutputs.data(), expectedOutputs.size());
+	optimizer.runEpochs(iterations);
 
+	// batchGradientDescent<SquareLoss>(graph, inputValues, expectedOutputs, iterations);
+	// batchGradientDescent(graph, inputValues, expectedOutputs, 10000);
 
 	// // let's try and train this graph
 	// for(int i = 0; i < 1000; ++i)
