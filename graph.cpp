@@ -32,9 +32,8 @@ float Node::getDerivative(Node* n)
 	return getDerivative(i);
 }
 
-void Node::computeDerivatives()
+void Node::computeDerivatives(float L)
 {
-	float L = 1;
 
 	// if I don't have children, I'm an output node
 	// otherwise, sum the child derivatives
@@ -159,7 +158,7 @@ void Graph::updateParams(std::function<float(float,float)> update )
 	}
 }
 
-float Graph::getOutput(int i, int j)
+float Graph::getOutput(int i)
 {
 	return outputNodes.at(i)->getResult();
 }
@@ -205,13 +204,21 @@ void Graph::traverse()
 	}
 }
 
-void Graph::backProp(int index)
+void Graph::backProp(int index, float baseDeriv)
 {
 	if(index > outputNodes.size()) { std::cout << "backProp out of index exception\n"; throw new std::exception(); }
 
 	setGraphUnderivated();	
 	std::vector<Node*> q;
-	q.push_back(outputNodes.at(index));
+
+	// do the first explicitly
+	auto oNode = outputNodes.at(index);
+	oNode->computeDerivatives(baseDeriv);
+	oNode->derivated = true;
+	for(auto p : oNode->parents)
+		q.push_back(p);
+
+	// q.push_back(outputNodes.at(index));
 
 	while(q.size())
 	{

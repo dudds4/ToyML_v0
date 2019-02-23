@@ -40,4 +40,21 @@ struct SigmoidNode : public Node
 	virtual void forward();
 };
 
+template <typename ForwardFunc, typename BackwardFunc>
+struct FunctionNode : public Node
+{
+	FunctionNode() {}
+	FunctionNode(Node* p) { setParent(p); }
+
+	virtual void forward()
+	{
+		auto p = parents.at(0);
+		float in = p->getResult();
+		output = ForwardFunc(in);
+
+		partialDerivatives.at(0) = BackwardFunc(in);
+	}
+};
+
+
 #endif // NODETYPES_H

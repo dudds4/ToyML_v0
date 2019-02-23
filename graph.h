@@ -18,7 +18,7 @@ struct Node
 	float getResult();
 	float getDerivative(int index);
 	float getDerivative(Node* n);
-	void computeDerivatives();
+	void computeDerivatives(float downstream=1);
 	bool isReadyForward();
 	bool isReadyBackward();
 
@@ -46,9 +46,9 @@ struct Graph
 	void setParams(const std::vector<float> &values);
 	void updateParams(std::function<float(float,float)> update );
 
-	float getOutput(int i=0, int j=0);
+	float getOutput(int i=0);
 	void traverse();
-	void backProp(int index);
+	void backProp(int index, float baseDeriv=1);
 	void traverseNodes( std::function<void(Node*)> visit );
 	void setGraphUnexecuted();
 	void setGraphUnderivated();
