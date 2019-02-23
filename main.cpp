@@ -57,8 +57,8 @@ void batchTrain(Graph& graph, floatset* inputs, floatset outputs, unsigned itera
 
 		lastOverallError = overallError;
 
-		if(i % 100 == 0)
-			std::cout << lastOverallError << std::endl;
+		// if(i % 100 == 0)
+		// 	std::cout << lastOverallError << std::endl;
 
 		// update params
 		for(unsigned k = 0; k < nParams; ++k)
