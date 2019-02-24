@@ -3,7 +3,7 @@ RM = rm -f
 CC = g++
 CFLAGS = -O2 -std=c++17
 
-LIBHDRS = inc/graph.h inc/nodetypes.h inc/layers.h inc/nodeset.h
+LIBHDRS = inc/graph.h inc/nodetypes.h inc/layers.h inc/nodeset.h inc/batchoptimizer.h inc/loss.h
 LIBSRCS = src/graph.cpp src/nodetypes.cpp src/layers.cpp
 
 INCLUDES = inc
