@@ -30,6 +30,8 @@ struct NodeSet
 		}
 	}
 
+	unsigned size() { return m_size; }
+
 	NodeT& at(size_t index)
 	{
 		if(index > m_size)

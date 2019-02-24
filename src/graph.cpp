@@ -16,7 +16,7 @@ T takeFirst(std::vector<T> &v)
 
 // Node implementations
 
-float Node::getResult() { return output; }
+float Node::getOutput() { return output; }
 float Node::getDerivative(int index) { return derivatives.at(index); }
 float Node::getDerivative(Node* n)
 {
@@ -34,7 +34,6 @@ float Node::getDerivative(Node* n)
 
 void Node::computeDerivatives(float L)
 {
-
 	// if I don't have children, I'm an output node
 	// otherwise, sum the child derivatives
 
@@ -74,7 +73,6 @@ bool Node::isReadyBackward()
 
 	return ready;
 }
-
 
 void Node::setParent(Node* n)
 {
@@ -118,6 +116,19 @@ void Node::setParents(const std::vector<Node*> &parentV)
 bool nodeReadyFwd(Node* a, Node* b) { return a->isReadyForward() && !b->isReadyForward(); }
 bool nodeReadyBwd(Node* a, Node* b) { return a->isReadyBackward() && !b->isReadyBackward(); }
 
+std::vector<float> Graph::forwardPass(const std::vector<float> &inputValues)
+{
+	std::vector<float> result;
+
+	setInputs(inputValues);
+	traverse();
+
+	for(auto n : outputNodes)
+		result.push_back(n->getOutput());
+	
+	return result;
+}
+
 void Graph::addInputNodes(const std::vector<InputNode*> &inputs)
 {
 	inputNodes.insert(inputNodes.end(), inputs.begin(), inputs.end());
@@ -160,7 +171,7 @@ void Graph::updateParams(std::function<float(float,float)> update )
 
 float Graph::getOutput(int i)
 {
-	return outputNodes.at(i)->getResult();
+	return outputNodes.at(i)->getOutput();
 }
 
 void Graph::traverse()

@@ -49,7 +49,7 @@ struct FunctionNode : public Node
 	virtual void forward()
 	{
 		auto p = parents.at(0);
-		float in = p->getResult();
+		float in = p->getOutput();
 		output = ForwardFunc(in);
 
 		partialDerivatives.at(0) = BackwardFunc(in);

@@ -65,3 +65,11 @@ void LinearLayer::setWeights(unsigned row, std::vector<float> w)
 		weights.at(row*cols + c).setInput(w.at(c));
 }
 
+void LinearLayer::randomizeWeights()
+{
+	for(unsigned i = 0; i < weights.size(); ++i)
+	{
+		float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+		weights.at(i).setInput(r);
+	}
+}

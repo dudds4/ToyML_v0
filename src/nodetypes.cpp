@@ -25,7 +25,7 @@ AdditionNode::AdditionNode(Node* a, Node* b)
 
 void AdditionNode::forward() 
 { 
-	output = parents.at(0)->getResult() + parents.at(1)->getResult();
+	output = parents.at(0)->getOutput() + parents.at(1)->getOutput();
 	partialDerivatives = {1, 1};
 }
 
@@ -44,8 +44,8 @@ MultiplicationNode::MultiplicationNode(Node* a, Node* b)
 
 void MultiplicationNode::forward() 
 {
-	float x = parents.at(0)->getResult();
-	float y = parents.at(1)->getResult();
+	float x = parents.at(0)->getOutput();
+	float y = parents.at(1)->getOutput();
 	
 	output = x * y;
 	partialDerivatives = {y, x};
@@ -62,7 +62,7 @@ SigmoidNode::SigmoidNode(Node* p)
 
 void SigmoidNode::forward() 
 {
-	float x = parents.at(0)->getResult();
+	float x = parents.at(0)->getOutput();
 	float z = 1.0f / (1.0f + exp(-1.0f*x));
 	
 	output = z;
@@ -123,8 +123,8 @@ void VectorMultNode::forward()
 	float x,w;
 	for(unsigned i = 0; i < l; ++i)
 	{
-		x = parents.at(i)->getResult();
-		w = parents.at(l+i)->getResult();
+		x = parents.at(i)->getOutput();
+		w = parents.at(l+i)->getOutput();
 		
 		output += x*w;
 

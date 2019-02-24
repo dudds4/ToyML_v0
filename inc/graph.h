@@ -15,7 +15,7 @@ struct Node
 	bool executed = false;
 	bool derivated = false;
 
-	float getResult();
+	float getOutput();
 	float getDerivative(int index);
 	float getDerivative(Node* n);
 	void computeDerivatives(float downstream=1);
@@ -45,6 +45,8 @@ struct Graph
 	void setInputs(const std::vector<float> &values);
 	void setParams(const std::vector<float> &values);
 	void updateParams(std::function<float(float,float)> update );
+
+	std::vector<float> forwardPass(const std::vector<float> &inputValues);
 
 	float getOutput(int i=0);
 	void traverse();
