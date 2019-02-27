@@ -129,6 +129,20 @@ std::vector<float> Graph::forwardPass(const std::vector<float> &inputValues)
 	return result;
 }
 
+std::vector<float> Graph::forwardPass(const float* inputValues)
+{
+	std::vector<float> result;
+
+	setInputs(inputValues, inputNodes.size());
+	traverse();
+
+	for(auto n : outputNodes)
+		result.push_back(n->getOutput());
+	
+	return result;
+}
+
+
 void Graph::addInputNodes(const std::vector<InputNode*> &inputs)
 {
 	inputNodes.insert(inputNodes.end(), inputs.begin(), inputs.end());
@@ -136,7 +150,14 @@ void Graph::addInputNodes(const std::vector<InputNode*> &inputs)
 
 void Graph::addParamNodes(const std::vector<InputNode*> &params)
 {
-	paramNodes.insert(paramNodes.end(), params.begin(), params.end());
+	paramNodes.reserve(paramNodes.size() + params.size());
+	for(auto n : params)
+	{
+		if(!n)
+			throw new std::exception();
+
+		paramNodes.push_back(n);
+	}
 }
 
 void copyValuesToInputNodes(const std::vector<float> &values, std::vector<InputNode*> &nodes)
@@ -148,9 +169,23 @@ void copyValuesToInputNodes(const std::vector<float> &values, std::vector<InputN
 	}	
 }
 
+void copyValuesToInputNodes(const float* values, unsigned n, std::vector<InputNode*> &nodes)
+{
+	if(n != nodes.size())
+		throw new std::exception();
+
+	for(unsigned i = 0; i < n; ++i)
+		nodes.at(i)->setInput(values[i]);
+}
+
 void Graph::setInputs(const std::vector<float> &values)
 {
 	copyValuesToInputNodes(values, inputNodes);
+}
+
+void Graph::setInputs(const float* values, unsigned n)
+{
+	copyValuesToInputNodes(values, n, inputNodes);
 }
 
 void Graph::setParams(const std::vector<float> &values)
@@ -215,19 +250,25 @@ void Graph::traverse()
 	}
 }
 
-void Graph::backProp(int index, float baseDeriv)
+
+void Graph::backProp(const float *baseDeriv, unsigned n)
 {
-	if(index > outputNodes.size()) { std::cout << "backProp out of index exception\n"; throw new std::exception(); }
+	if(n != outputNodes.size())
+		throw new std::exception();
+
 
 	setGraphUnderivated();	
 	std::vector<Node*> q;
 
-	// do the first explicitly
-	auto oNode = outputNodes.at(index);
-	oNode->computeDerivatives(baseDeriv);
-	oNode->derivated = true;
-	for(auto p : oNode->parents)
-		q.push_back(p);
+	unsigned i = 0;
+	// do the output layer explicitly
+	for(auto oNode : outputNodes)
+	{
+		oNode->computeDerivatives(baseDeriv[i++]);
+		oNode->derivated = true;
+		for(auto p : oNode->parents)
+			q.push_back(p);		
+	}
 
 	// q.push_back(outputNodes.at(index));
 
@@ -247,7 +288,7 @@ void Graph::backProp(int index, float baseDeriv)
 			// pretty sure this is unreachable with current architecture & declarative flow
 			// as such its kind of untested, but in theory it should work
 
-			std::cout << "backprop had to sort!" << std::endl;
+			// std::cout << "backprop had to sort!" << std::endl;
 			// move the ready nodes to the front of the queue
 			std::sort(q.begin(), q.end(), nodeReadyBwd);
 			// add our node back into the queue
@@ -255,6 +296,52 @@ void Graph::backProp(int index, float baseDeriv)
 		}
 	}
 }
+
+void Graph::backProp(const std::vector<float>& baseDeriv)
+{
+	backProp(baseDeriv.data(), baseDeriv.size());
+}
+
+// void Graph::backProp(int index, float baseDeriv)
+// {
+// 	if(index > outputNodes.size()) { std::cout << "backProp out of index exception\n"; throw new std::exception(); }
+
+// 	setGraphUnderivated();	
+// 	std::vector<Node*> q;
+
+// 	// do the first explicitly
+// 	auto oNode = outputNodes.at(index);
+// 	oNode->computeDerivatives(baseDeriv);
+// 	oNode->derivated = true;
+// 	for(auto p : oNode->parents)
+// 		q.push_back(p);
+
+// 	// q.push_back(outputNodes.at(index));
+
+// 	while(q.size())
+// 	{
+// 		auto n = takeFirst(q);
+
+// 		if(n->isReadyBackward())
+// 		{
+// 			n->computeDerivatives();
+// 			n->derivated = true;
+// 			for(auto p : n->parents)
+// 				q.push_back(p);
+// 		}
+// 		else
+// 		{
+// 			// pretty sure this is unreachable with current architecture & declarative flow
+// 			// as such its kind of untested, but in theory it should work
+
+// 			std::cout << "backprop had to sort!" << std::endl;
+// 			// move the ready nodes to the front of the queue
+// 			std::sort(q.begin(), q.end(), nodeReadyBwd);
+// 			// add our node back into the queue
+// 			q.push_back(n);
+// 		}
+// 	}
+// }
 
 void Graph::traverseNodes( std::function<void(Node*)> visit )
 {
@@ -297,3 +384,4 @@ void Graph::setGraphUnderivated()
 		}
 	);		
 }
+

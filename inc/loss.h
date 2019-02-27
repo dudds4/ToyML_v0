@@ -1,17 +1,32 @@
 #ifndef LOSS_H
 #define LOSS_H
 
+#include <vector>
+
 struct SquareLoss
 {
-	static float loss(float yout, float yexpected)
+	static float loss(float *yout, float *yexpected, unsigned n)
 	{
-		float x = yout - yexpected;
-		return x * x;
+		float totalLoss = 0;
+
+		for(unsigned i = 0; i < n; ++i)
+		{
+			float e = yout[i] - yexpected[i];
+			totalLoss += e*e;
+		}
+
+		return totalLoss;
 	}
 
-	static float derivative(float yout, float yexpected)
+	static std::vector<float> derivative(float *yout, float *yexpected, unsigned n)
 	{
-		return 2 * (yout - yexpected);
+		std::vector<float> result;
+		result.reserve(n);
+
+		for(unsigned i = 0; i < n; ++i)
+			result.push_back(yout[i] - yexpected[i]);
+
+		return result;
 	}
 };
 

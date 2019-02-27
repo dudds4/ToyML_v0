@@ -18,7 +18,7 @@ struct BatchOptimizer
 		paramDerivs.resize(nParams);
 	}
 
-	void setTrainingSet(std::vector<float> *in, float* out, unsigned n)
+	void setTrainingSet(float* in, float* out, unsigned n)
 	{ 
 		inputs = in;
 		outputs = out;
@@ -31,21 +31,31 @@ struct BatchOptimizer
 
 	void runEpoch()
 	{
+		unsigned inW = graph->inputNodes.size();
+		unsigned outW = graph->outputNodes.size();
+
 		memset(paramDerivs.data(), 0, sizeof(float)*nParams);
+
 		float overallError = 0;
+
+		float *inPtr = inputs;
+		float *outPtr = outputs;
 
 		// compute summed derivative
 		for(unsigned j = 0; j < setSize; ++j)
 		{
-			float output = graph->forwardPass(inputs[j]).at(0);
+			auto outputs = graph->forwardPass(inPtr);
 
-			overallError += LossT::loss(output, outputs[j]);
-			float baseDeriv = LossT::derivative(output, outputs[j]);
+			overallError += LossT::loss(outputs.data(), outPtr, outW);
+			auto baseDeriv = LossT::derivative(outputs.data(), outPtr, outW);
 
-			graph->backProp(0, baseDeriv);
+			graph->backProp(baseDeriv);
 
 			for(unsigned k = 0; k < nParams; ++k)
 				paramDerivs[k] += graph->paramNodes[k]->getDerivative(0);
+
+			inPtr += inW;
+			outPtr += outW;
 
 		}
 
@@ -61,9 +71,8 @@ struct BatchOptimizer
 	void setLearningRate(float r) { learningRate = r; } 
 
 protected:
-
 	Graph *graph;
-	std::vector<float> *inputs; 
+	float* inputs; 
 	float* outputs;
 	unsigned setSize;
 
@@ -79,16 +88,16 @@ template<typename LossT>
 struct GradientDescent : public BatchOptimizer<GradientDescent, LossT>
 {
 	GradientDescent(Graph *g) {
-		this->graph = g;
+		this->setGraph(g);
 	}
 
 	void updateParams()
 	{
 		unsigned nParams = this->graph->paramNodes.size();
-
 		for(unsigned k = 0; k < nParams; ++k)
 		{
 			auto pNode = this->graph->paramNodes[k];
+			
 			float w = pNode->getInput();
 			pNode->setInput(w - this->learningRate*this->paramDerivs[k]);
 		}		

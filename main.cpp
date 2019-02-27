@@ -37,23 +37,36 @@ int main()
 
 	// optimize params to get an XOR function
 
-	floatset inputValues[4];
-	inputValues[0] = {0,0,1,1};
-	inputValues[1] = {1,0,1,1};
-	inputValues[2] = {0,1,1,1};
-	inputValues[3] = {1,1,1,1};
+	const int TRAINING_SET_SIZE = 4;
+	const int N_INPUTS = 2;
+	const int N_OUTPUTS = 1;
 
-	floatset expectedOutputs = {0,1,1,0};
+	float inputValues[N_INPUTS*TRAINING_SET_SIZE] = {
+		0,0,
+		1,0, 
+		0,1, 
+		1,1 
+	};
+
+	float expectedOutputs[N_OUTPUTS*TRAINING_SET_SIZE] = {
+		0,
+		1,
+		1,
+		0
+	};
 
 	GradientDescent<SquareLoss> optimizer(&graph);
-	optimizer.setTrainingSet(inputValues, expectedOutputs.data(), expectedOutputs.size());
+	optimizer.setTrainingSet(inputValues, expectedOutputs, TRAINING_SET_SIZE);
+
+	// std::cout << "Running epochs..." << std::endl;
 	optimizer.runEpochs(10000);
 
 	for(int j = 0; j < 4; ++j)
 	{
-		float output = graph.forwardPass(inputValues[j]).at(0);
+		int ind = j*N_INPUTS;
+		float output = graph.forwardPass(&inputValues[ind]).at(0);
 		std::cout 	<< "XOR(" 
-					<< inputValues[j][0] << "," << inputValues[j][1]
+					<< inputValues[ind] << "," << inputValues[ind+1]
 					<< ") = " << output << std::endl;
 	
 	}

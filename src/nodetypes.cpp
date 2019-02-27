@@ -132,3 +132,38 @@ void VectorMultNode::forward()
 		partialDerivatives.at(l+i) = x;
 	}
 }
+
+MaxNode::MaxNode(const std::vector<Node*>& p) { setParents(p); }
+
+void MaxNode::forward()
+{
+	unsigned n = parents.size();
+	float max = parents.at(0)->getOutput();
+	unsigned index = 0;
+
+
+	for(int i = 1; i < n; ++i)
+	{
+		float o = parents.at(i)->getOutput();
+		if(o > max)
+		{
+			max = o;
+			index = i;
+		}
+	}
+
+	output = max;
+
+	for(int i = 0; i < n; ++i)
+	{
+		partialDerivatives.at(i) = index == i ? 1 : 0;
+	}
+}
+
+void InverseNode::forward()
+{
+	float i = parents.at(0)->getOutput();
+	output = 1.0f / i;
+	partialDerivatives.at(0) = -1.0f / (i*i);
+}
+

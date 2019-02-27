@@ -21,6 +21,7 @@ struct AdditionNode : public Node
 
 struct MultiplicationNode : public Node
 {
+	MultiplicationNode() {}
 	MultiplicationNode(Node* a, Node* b);
 	virtual void forward();
 };
@@ -56,5 +57,19 @@ struct FunctionNode : public Node
 	}
 };
 
+struct MaxNode : public Node
+{
+	MaxNode() {}
+	MaxNode(const std::vector<Node*>& p);
+	virtual void forward();
+};
+
+struct InverseNode : public Node
+{
+	InverseNode() {}
+	InverseNode(Node* p) { setParent(p); }
+
+	virtual void forward();
+};
 
 #endif // NODETYPES_H

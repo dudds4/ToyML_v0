@@ -43,14 +43,20 @@ struct Graph
 	void addParamNodes(const std::vector<InputNode*> &inputs);
 
 	void setInputs(const std::vector<float> &values);
+	void setInputs(const float* values, unsigned n);
+
 	void setParams(const std::vector<float> &values);
 	void updateParams(std::function<float(float,float)> update );
 
 	std::vector<float> forwardPass(const std::vector<float> &inputValues);
+	std::vector<float> forwardPass(const float* inputValues);
 
 	float getOutput(int i=0);
 	void traverse();
-	void backProp(int index, float baseDeriv=1);
+
+	void backProp(const float *baseDeriv, unsigned n);
+	void backProp(const std::vector<float>& baseDeriv);
+	
 	void traverseNodes( std::function<void(Node*)> visit );
 	void setGraphUnexecuted();
 	void setGraphUnderivated();
