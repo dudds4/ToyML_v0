@@ -17,11 +17,11 @@ bin:
 	mkdir bin
 
 bin/toyml: ${MSRCS} ${LIBHDRS} ${LIBSRCS}
-	@printf "Compiling toyml\n"
+# 	@printf "Compiling toyml\n"
 	$(CC) -I${INCLUDES} ${MSRCS} ${LIBSRCS} $(CFLAGS) -o bin/toyml
 
 bin/tests: ${TSRCS} ${LIBHDRS} ${LIBSRCS}
-	@printf "Compiling tests\n"
+# 	@printf "Compiling tests\n"
 	$(CC) -I${INCLUDES} ${TSRCS} ${LIBSRCS} $(CFLAGS) -o bin/tests
 
 clean:

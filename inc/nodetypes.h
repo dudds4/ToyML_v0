@@ -13,6 +13,14 @@ struct InputNode : public Node
 	virtual void forward();
 };
 
+// struct VectorInputNode : public Node
+// {
+// 	VectorInputNode(int size);
+// 	explicit VectorInputNode (int size);
+// 	void setInput(const std::vector<float>& src);
+// 	void getInput(std::vector<float>& dst);
+// };
+
 struct AdditionNode : public Node
 {
 	AdditionNode(Node* a, Node* b);

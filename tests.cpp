@@ -3,11 +3,25 @@
 
 #include <iostream>
 #include <cstdlib>
+#include <ctime>
 
 void additionTest(float x, float y);
 void multiplicationTest(float x, float y);
 void addMultTest(float x, float y);
 void vectorMultTest();
+
+template<typename T>
+void tprint(T item)
+{
+	std::cout << item ;
+}
+
+template<typename T, typename ... Types>
+void tprint(T item, Types ... args)
+{
+	std::cout << item << ' ';
+	tprint(args...);
+}
 
 int main()
 {
@@ -22,7 +36,9 @@ int main()
 	return 0;
 }
 
-#define ASSERT_EQUAL(a, b) do { if((a) != (b)) std::cout << "Test equal failed. Expected: " << (a) << ". Got: " << (b) << "." << std::endl; } while(0)
+#define ABS(a) ((a) > 0 ? (a) : -(a))
+#define ASSERT_EQUAL(a, b) 				do { if((a) != (b)) std::cout << "Test equal failed. Expected: " << (a) << ". Got: " << (b) << "." << std::endl; } while(0)
+#define ASSERT_FLOAT_EQUAL(a,b,tol) 	do { if( ABS((a) - (b)) > tol) tprint("Test equal failed. Expected: ", a, ". Got", b, " (diff=", (b)-(a), ").\n"); } while(0)
 
 void additionTest(float x, float y)
 {
@@ -41,9 +57,9 @@ void additionTest(float x, float y)
 	graph.traverse();
 
 	float actual = graph.getOutput(0);
-	float expected= x + y;
+	float expected = x + y;
 
-	ASSERT_EQUAL(actual, expected);
+	ASSERT_FLOAT_EQUAL(actual, expected, 1e-6);
 }
 
 void multiplicationTest(float x, float y)
@@ -65,7 +81,7 @@ void multiplicationTest(float x, float y)
 	float actual = graph.getOutput(0);
 	float expected= x*y;
 
-	ASSERT_EQUAL(actual, expected);
+	ASSERT_FLOAT_EQUAL(actual, expected, 1e-6);
 }
 
 void addMultTest(float x, float y)
@@ -88,7 +104,7 @@ void addMultTest(float x, float y)
 	float actual = graph.getOutput(0);
 	float expected= x*(x+y);
 
-	ASSERT_EQUAL(actual, expected);
+	ASSERT_FLOAT_EQUAL(actual, expected, 1e-6);
 }
 
 void vectorMultTest()
@@ -127,5 +143,5 @@ void vectorMultTest()
 
 	float actual = graph.getOutput(0);
 
-	ASSERT_EQUAL(actual, expected);
+	ASSERT_FLOAT_EQUAL(actual, expected, 1e-6);
 }
