@@ -48,7 +48,7 @@ std::vector<Node*> LinearLayer::getOutputNodes()
 
 InputNode* LinearLayer::getBiasNode() { return &bias; }
 
-void LinearLayer::setWeights(unsigned row, std::vector<float> w)
+void LinearLayer::setWeights(unsigned row, std::vector<double> w)
 {
 	if(row > numOutputs)
 		throw new std::exception();
@@ -69,7 +69,7 @@ void LinearLayer::randomizeWeights()
 {
 	for(unsigned i = 0; i < weights.size(); ++i)
 	{
-		float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+		double r = static_cast <double> (rand()) / static_cast <double> (RAND_MAX);
 		weights.at(i).setInput(r);
 	}
 }

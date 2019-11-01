@@ -5,26 +5,26 @@
 
 struct SquareLoss
 {
-	static float loss(float *yout, float *yexpected, unsigned n)
+	static double loss(double *yout, double *yexpected, unsigned n)
 	{
-		float totalLoss = 0;
+		double totalLoss = 0;
 
 		for(unsigned i = 0; i < n; ++i)
 		{
-			float e = yout[i] - yexpected[i];
+			double e = yout[i] - yexpected[i];
 			totalLoss += e*e;
 		}
 
 		return totalLoss;
 	}
 
-	static std::vector<float> derivative(float *yout, float *yexpected, unsigned n)
+	static std::vector<double> derivative(double *yout, double *yexpected, unsigned n)
 	{
-		std::vector<float> result;
+		std::vector<double> result;
 		result.reserve(n);
 
 		for(unsigned i = 0; i < n; ++i)
-			result.push_back(yout[i] - yexpected[i]);
+			result.push_back(2*(yout[i] - yexpected[i]));
 
 		return result;
 	}

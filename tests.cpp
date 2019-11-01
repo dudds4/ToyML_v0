@@ -5,10 +5,11 @@
 #include <cstdlib>
 #include <ctime>
 
-void additionTest(float x, float y);
-void multiplicationTest(float x, float y);
-void addMultTest(float x, float y);
+void additionTest(double x, double y);
+void multiplicationTest(double x, double y);
+void addMultTest(double x, double y);
 void vectorMultTest();
+double randFloatRange(double lower, double higher);
 
 template<typename T>
 void tprint(T item)
@@ -28,11 +29,11 @@ int main()
 	srand(time(NULL));
 
 	// all the tests
-	additionTest(rand(), rand());
+	additionTest(rand());
 	multiplicationTest(rand(), rand());
 	addMultTest(rand(), rand());
 	vectorMultTest();
-
+	
 	return 0;
 }
 
@@ -40,7 +41,12 @@ int main()
 #define ASSERT_EQUAL(a, b) 				do { if((a) != (b)) std::cout << "Test equal failed. Expected: " << (a) << ". Got: " << (b) << "." << std::endl; } while(0)
 #define ASSERT_FLOAT_EQUAL(a,b,tol) 	do { if( ABS((a) - (b)) > tol) tprint("Test equal failed. Expected: ", a, ". Got", b, " (diff=", (b)-(a), ").\n"); } while(0)
 
-void additionTest(float x, float y)
+double randFloatRange(double lower, double higher)
+{
+	return rand() * (higher - lower) / RAND_MAX + lower;
+}
+
+void additionTest(double x, double y)
 {
 	Graph graph;
 	
@@ -56,13 +62,13 @@ void additionTest(float x, float y)
 	graph.setInputs({x, y});
 	graph.traverse();
 
-	float actual = graph.getOutput(0);
-	float expected = x + y;
+	double actual = graph.getOutput(0);
+	double expected = x + y;
 
 	ASSERT_FLOAT_EQUAL(actual, expected, 1e-6);
 }
 
-void multiplicationTest(float x, float y)
+void multiplicationTest(double x, double y)
 {
 	Graph graph;
 	
@@ -78,13 +84,13 @@ void multiplicationTest(float x, float y)
 	graph.setInputs({x, y});
 	graph.traverse();
 
-	float actual = graph.getOutput(0);
-	float expected= x*y;
+	double actual = graph.getOutput(0);
+	double expected= x*y;
 
 	ASSERT_FLOAT_EQUAL(actual, expected, 1e-6);
 }
 
-void addMultTest(float x, float y)
+void addMultTest(double x, double y)
 {
 	Graph graph;
 	
@@ -101,8 +107,8 @@ void addMultTest(float x, float y)
 	graph.setInputs({x, y});
 	graph.traverse();
 
-	float actual = graph.getOutput(0);
-	float expected= x*(x+y);
+	double actual = graph.getOutput(0);
+	double expected= x*(x+y);
 
 	ASSERT_FLOAT_EQUAL(actual, expected, 1e-6);
 }
@@ -118,7 +124,7 @@ void vectorMultTest()
 	InputNode w[L];
 	InputNode x[L];
 
-	float expected = 0;
+	double expected = 0;
 	for(int i = 0; i < L; ++i)
 	{
 		inputs.push_back(&x[i]);
@@ -127,8 +133,8 @@ void vectorMultTest()
 		v.push_back(&x[i]);
 		v.push_back(&w[i]);
 
-		w[i].setInput(rand());
-		x[i].setInput(rand());
+		w[i].setInput(randFloatRange(-100,100));
+		x[i].setInput(randFloatRange(-100,100));
 		expected += w[i].getInput() * x[i].getInput();
 	}
 
@@ -141,7 +147,7 @@ void vectorMultTest()
 
 	graph.traverse();
 
-	float actual = graph.getOutput(0);
+	double actual = graph.getOutput(0);
 
 	ASSERT_FLOAT_EQUAL(actual, expected, 1e-6);
 }

@@ -4,8 +4,9 @@
 #include "graph.h"
 #include "nodetypes.h"
 #include <cstring>
+#include <iostream>
 
-typedef std::vector<float> floatset;
+typedef std::vector<double> floatset;
 
 template<template<typename T> class OptimT, typename LossT>
 struct BatchOptimizer
@@ -18,7 +19,7 @@ struct BatchOptimizer
 		paramDerivs.resize(nParams);
 	}
 
-	void setTrainingSet(float* in, float* out, unsigned n)
+	void setTrainingSet(double* in, double* out, unsigned n)
 	{ 
 		inputs = in;
 		outputs = out;
@@ -34,25 +35,23 @@ struct BatchOptimizer
 		unsigned inW = graph->inputNodes.size();
 		unsigned outW = graph->outputNodes.size();
 
-		memset(paramDerivs.data(), 0, sizeof(float)*nParams);
+		memset(paramDerivs.data(), 0, sizeof(double)*nParams);
 
-		float overallError = 0;
+		double overallError = 0;
 
-		float *inPtr = inputs;
-		float *outPtr = outputs;
+		double *inPtr = inputs;
+		double *outPtr = outputs;
 
 		// compute summed derivative
 		for(unsigned j = 0; j < setSize; ++j)
 		{
 			auto outputs = graph->forwardPass(inPtr);
-
 			overallError += LossT::loss(outputs.data(), outPtr, outW);
 			auto baseDeriv = LossT::derivative(outputs.data(), outPtr, outW);
-
 			graph->backProp(baseDeriv);
 
 			for(unsigned k = 0; k < nParams; ++k)
-				paramDerivs[k] += graph->paramNodes[k]->getDerivative(0);
+				paramDerivs[k] += graph->paramNodes[k]->getDerivative(0) / (double)setSize;
 
 			inPtr += inW;
 			outPtr += outW;
@@ -64,22 +63,35 @@ struct BatchOptimizer
 
 		lastOverallError = overallError;
 
+		// gradient clipping
+		if(maxGradient > 0)
+		{
+			for(unsigned k = 0; k < nParams; ++k)
+			{	
+				if(paramDerivs[k] > maxGradient) paramDerivs[k] = maxGradient;
+				else if(paramDerivs[k] < -maxGradient) paramDerivs[k] = -maxGradient;
+			}
+		}
+
 		// update params
 		updateParamsInterface();
 	}
 
-	void setLearningRate(float r) { learningRate = r; } 
+	void setGradientClipping(double maxGrad=-1) { maxGradient = maxGrad; }
+	void setLearningRate(double r) { learningRate = r; } 
+	double getLearningRate() { return learningRate; } 
 
 protected:
 	Graph *graph;
-	float* inputs; 
-	float* outputs;
+	double* inputs; 
+	double* outputs;
 	unsigned setSize;
 
-	float lastOverallError = 0;
-	float learningRate = 0.2;
+	double lastOverallError = 0;
+	double learningRate = 0.2;
+	double maxGradient = -1;
 
-	std::vector<float> paramDerivs;
+	std::vector<double> paramDerivs;
 	unsigned nParams;
 };
 
@@ -98,7 +110,7 @@ struct GradientDescent : public BatchOptimizer<GradientDescent, LossT>
 		{
 			auto pNode = this->graph->paramNodes[k];
 			
-			float w = pNode->getInput();
+			double w = pNode->getInput();
 			pNode->setInput(w - this->learningRate*this->paramDerivs[k]);
 		}		
 	}

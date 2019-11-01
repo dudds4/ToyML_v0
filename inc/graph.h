@@ -15,10 +15,10 @@ struct Node
 	bool executed = false;
 	bool derivated = false;
 
-	float getOutput();
-	float getDerivative(int index);
-	float getDerivative(Node* n);
-	void computeDerivatives(float downstream=1);
+	double getOutput();
+	double getDerivative(int index);
+	double getDerivative(Node* n);
+	void computeDerivatives(double downstream=1);
 	bool isReadyForward();
 	bool isReadyBackward();
 
@@ -26,9 +26,9 @@ struct Node
 	void setParents(const std::vector<Node*> &parentV);
 
 protected:
-	float output = 0;
-	std::vector<float> derivatives;
-	std::vector<float> partialDerivatives;
+	double output = 0;
+	std::vector<double> derivatives;
+	std::vector<double> partialDerivatives;
 };
 
 struct InputNode;
@@ -42,20 +42,20 @@ struct Graph
 	void addInputNodes(const std::vector<InputNode*> &inputs);
 	void addParamNodes(const std::vector<InputNode*> &inputs);
 
-	void setInputs(const std::vector<float> &values);
-	void setInputs(const float* values, unsigned n);
+	void setInputs(const std::vector<double> &values);
+	void setInputs(const double* values, unsigned n);
 
-	void setParams(const std::vector<float> &values);
-	void updateParams(std::function<float(float,float)> update );
+	void setParams(const std::vector<double> &values);
+	void updateParams(std::function<double(double,double)> update );
 
-	std::vector<float> forwardPass(const std::vector<float> &inputValues);
-	std::vector<float> forwardPass(const float* inputValues);
+	std::vector<double> forwardPass(const std::vector<double> &inputValues);
+	std::vector<double> forwardPass(const double* inputValues);
 
-	float getOutput(int i=0);
+	double getOutput(int i=0);
 	void traverse();
 
-	void backProp(const float *baseDeriv, unsigned n);
-	void backProp(const std::vector<float>& baseDeriv);
+	void backProp(const double *baseDeriv, unsigned n);
+	void backProp(const std::vector<double>& baseDeriv);
 	
 	void traverseNodes( std::function<void(Node*)> visit );
 	void setGraphUnexecuted();

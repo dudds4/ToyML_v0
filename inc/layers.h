@@ -15,7 +15,7 @@ struct LinearLayer
 	std::vector<InputNode*> getWeightNodes();
 	std::vector<Node*> getOutputNodes();
 	InputNode* getBiasNode();
-	void setWeights(unsigned row, std::vector<float> w);
+	void setWeights(unsigned row, std::vector<double> w);
 	void randomizeWeights();
 
 protected:

@@ -16,9 +16,9 @@ T takeFirst(std::vector<T> &v)
 
 // Node implementations
 
-float Node::getOutput() { return output; }
-float Node::getDerivative(int index) { return derivatives.at(index); }
-float Node::getDerivative(Node* n)
+double Node::getOutput() { return output; }
+double Node::getDerivative(int index) { return derivatives.at(index); }
+double Node::getDerivative(Node* n)
 {
 	auto it = std::find(parents.begin(), parents.end(), n);
 
@@ -32,7 +32,7 @@ float Node::getDerivative(Node* n)
 	return getDerivative(i);
 }
 
-void Node::computeDerivatives(float L)
+void Node::computeDerivatives(double L)
 {
 	// if I don't have children, I'm an output node
 	// otherwise, sum the child derivatives
@@ -116,9 +116,9 @@ void Node::setParents(const std::vector<Node*> &parentV)
 bool nodeReadyFwd(Node* a, Node* b) { return a->isReadyForward() && !b->isReadyForward(); }
 bool nodeReadyBwd(Node* a, Node* b) { return a->isReadyBackward() && !b->isReadyBackward(); }
 
-std::vector<float> Graph::forwardPass(const std::vector<float> &inputValues)
+std::vector<double> Graph::forwardPass(const std::vector<double> &inputValues)
 {
-	std::vector<float> result;
+	std::vector<double> result;
 
 	setInputs(inputValues);
 	traverse();
@@ -129,9 +129,9 @@ std::vector<float> Graph::forwardPass(const std::vector<float> &inputValues)
 	return result;
 }
 
-std::vector<float> Graph::forwardPass(const float* inputValues)
+std::vector<double> Graph::forwardPass(const double* inputValues)
 {
-	std::vector<float> result;
+	std::vector<double> result;
 
 	setInputs(inputValues, inputNodes.size());
 	traverse();
@@ -160,7 +160,7 @@ void Graph::addParamNodes(const std::vector<InputNode*> &params)
 	}
 }
 
-void copyValuesToInputNodes(const std::vector<float> &values, std::vector<InputNode*> &nodes)
+void copyValuesToInputNodes(const std::vector<double> &values, std::vector<InputNode*> &nodes)
 {
 	unsigned s = std::min(nodes.size(), values.size());
 	for(unsigned i = 0; i < s; ++i)
@@ -169,7 +169,7 @@ void copyValuesToInputNodes(const std::vector<float> &values, std::vector<InputN
 	}	
 }
 
-void copyValuesToInputNodes(const float* values, unsigned n, std::vector<InputNode*> &nodes)
+void copyValuesToInputNodes(const double* values, unsigned n, std::vector<InputNode*> &nodes)
 {
 	if(n != nodes.size())
 		throw new std::exception();
@@ -178,33 +178,33 @@ void copyValuesToInputNodes(const float* values, unsigned n, std::vector<InputNo
 		nodes.at(i)->setInput(values[i]);
 }
 
-void Graph::setInputs(const std::vector<float> &values)
+void Graph::setInputs(const std::vector<double> &values)
 {
 	copyValuesToInputNodes(values, inputNodes);
 }
 
-void Graph::setInputs(const float* values, unsigned n)
+void Graph::setInputs(const double* values, unsigned n)
 {
 	copyValuesToInputNodes(values, n, inputNodes);
 }
 
-void Graph::setParams(const std::vector<float> &values)
+void Graph::setParams(const std::vector<double> &values)
 {
 	copyValuesToInputNodes(values, paramNodes);
 }
 
 
-void Graph::updateParams(std::function<float(float,float)> update )
+void Graph::updateParams(std::function<double(double,double)> update )
 {
 	for(auto node : paramNodes)
 	{
-		float w = node->getInput();
-		float deriv = node->getDerivative(0);
+		double w = node->getInput();
+		double deriv = node->getDerivative(0);
 		node->setInput(update(w, deriv));
 	}
 }
 
-float Graph::getOutput(int i)
+double Graph::getOutput(int i)
 {
 	return outputNodes.at(i)->getOutput();
 }
@@ -237,7 +237,7 @@ void Graph::traverse()
 			{
 				// pretty sure this is unreachable with current architecture & declarative flow
 				// as such its kind of untested, but in theory it should work				
-				// std::cout << "traverse had to sort!" << std::endl;
+				std::cout << "traverse had to sort!" << std::endl;
 
 				// move the ready nodes to the front of the queue
 				std::sort(q.begin(), q.end(), nodeReadyFwd);
@@ -251,7 +251,7 @@ void Graph::traverse()
 }
 
 
-void Graph::backProp(const float *baseDeriv, unsigned n)
+void Graph::backProp(const double *baseDeriv, unsigned n)
 {
 	if(n != outputNodes.size())
 		throw new std::exception();
@@ -297,7 +297,7 @@ void Graph::backProp(const float *baseDeriv, unsigned n)
 	}
 }
 
-void Graph::backProp(const std::vector<float>& baseDeriv)
+void Graph::backProp(const std::vector<double>& baseDeriv)
 {
 	backProp(baseDeriv.data(), baseDeriv.size());
 }

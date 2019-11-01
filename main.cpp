@@ -41,14 +41,14 @@ int main()
 	const int N_INPUTS = 2;
 	const int N_OUTPUTS = 1;
 
-	float inputValues[N_INPUTS*TRAINING_SET_SIZE] = {
+	double inputValues[N_INPUTS*TRAINING_SET_SIZE] = {
 		0,0,
 		1,0, 
 		0,1, 
 		1,1 
 	};
 
-	float expectedOutputs[N_OUTPUTS*TRAINING_SET_SIZE] = {
+	double expectedOutputs[N_OUTPUTS*TRAINING_SET_SIZE] = {
 		0,
 		1,
 		1,
@@ -64,7 +64,7 @@ int main()
 	for(int j = 0; j < 4; ++j)
 	{
 		int ind = j*N_INPUTS;
-		float output = graph.forwardPass(&inputValues[ind]).at(0);
+		double output = graph.forwardPass(&inputValues[ind]).at(0);
 		std::cout 	<< "XOR(" 
 					<< inputValues[ind] << "," << inputValues[ind+1]
 					<< ") = " << output << std::endl;

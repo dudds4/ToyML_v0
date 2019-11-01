@@ -6,9 +6,9 @@
 struct InputNode : public Node
 {
 	InputNode();
-	explicit InputNode (float i);
-	void setInput(float i);
-	float getInput();
+	explicit InputNode (double i);
+	void setInput(double i);
+	double getInput();
 
 	virtual void forward();
 };
@@ -58,7 +58,7 @@ struct FunctionNode : public Node
 	virtual void forward()
 	{
 		auto p = parents.at(0);
-		float in = p->getOutput();
+		double in = p->getOutput();
 		output = ForwardFunc(in);
 
 		partialDerivatives.at(0) = BackwardFunc(in);

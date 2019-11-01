@@ -4,10 +4,10 @@
 // ---------------------- Input Node ----------------------
 
 InputNode::InputNode() { output=0; }
-InputNode::InputNode (float i) { output = i; }
+InputNode::InputNode (double i) { output = i; }
 
-void InputNode::setInput(float i) { output = i; }
-float InputNode::getInput() { return output; }
+void InputNode::setInput(double i) { output = i; }
+double InputNode::getInput() { return output; }
 void InputNode::forward() { partialDerivatives = {1}; }
 
 // ---------------------- Addition Node ----------------------
@@ -44,8 +44,8 @@ MultiplicationNode::MultiplicationNode(Node* a, Node* b)
 
 void MultiplicationNode::forward() 
 {
-	float x = parents.at(0)->getOutput();
-	float y = parents.at(1)->getOutput();
+	double x = parents.at(0)->getOutput();
+	double y = parents.at(1)->getOutput();
 	
 	output = x * y;
 	partialDerivatives = {y, x};
@@ -62,11 +62,11 @@ SigmoidNode::SigmoidNode(Node* p)
 
 void SigmoidNode::forward() 
 {
-	float x = parents.at(0)->getOutput();
-	float z = 1.0f / (1.0f + exp(-1.0f*x));
+	double x = parents.at(0)->getOutput();
+	double z = 1.0 / (1.0 + exp(-1.0*x));
 	
 	output = z;
-	partialDerivatives = { z*(1.0f-z) };
+	partialDerivatives = { z*(1.0-z) };
 }
 
 // ---------------------- Vector Multiplication Node ----------------------
@@ -120,7 +120,7 @@ void VectorMultNode::forward()
 	output = 0;
 	unsigned l = parents.size() / 2;
 
-	float x,w;
+	double x,w;
 	for(unsigned i = 0; i < l; ++i)
 	{
 		x = parents.at(i)->getOutput();
@@ -138,13 +138,13 @@ MaxNode::MaxNode(const std::vector<Node*>& p) { setParents(p); }
 void MaxNode::forward()
 {
 	unsigned n = parents.size();
-	float max = parents.at(0)->getOutput();
+	double max = parents.at(0)->getOutput();
 	unsigned index = 0;
 
 
 	for(int i = 1; i < n; ++i)
 	{
-		float o = parents.at(i)->getOutput();
+		double o = parents.at(i)->getOutput();
 		if(o > max)
 		{
 			max = o;
@@ -162,8 +162,8 @@ void MaxNode::forward()
 
 void InverseNode::forward()
 {
-	float i = parents.at(0)->getOutput();
-	output = 1.0f / i;
-	partialDerivatives.at(0) = -1.0f / (i*i);
+	double i = parents.at(0)->getOutput();
+	output = 1.0 / i;
+	partialDerivatives.at(0) = -1.0 / (i*i);
 }
 
