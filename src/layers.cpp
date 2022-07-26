@@ -73,3 +73,10 @@ void LinearLayer::randomizeWeights()
 		weights.at(i).setInput(r);
 	}
 }
+
+void LinearLayer::printWeights()
+{
+    for(unsigned i = 0; i < weights.size(); ++i)
+        std::cout << weights.at(i).getInput() << " ";
+    std::cout << std::endl;
+}

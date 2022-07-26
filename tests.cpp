@@ -29,11 +29,11 @@ int main()
 	srand(time(NULL));
 
 	// all the tests
-	additionTest(rand());
+	additionTest(rand(), rand());
 	multiplicationTest(rand(), rand());
 	addMultTest(rand(), rand());
 	vectorMultTest();
-	
+
 	return 0;
 }
 

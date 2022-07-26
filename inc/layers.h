@@ -7,23 +7,25 @@
 
 #include <memory>
 #include <vector>
+#include <iostream>
 
 struct LinearLayer
 {
-	LinearLayer(const std::vector<Node*>& inputs, size_t nOutputs);
+    LinearLayer(const std::vector<Node*>& inputs, size_t nOutputs);
 
-	std::vector<InputNode*> getWeightNodes();
-	std::vector<Node*> getOutputNodes();
-	InputNode* getBiasNode();
-	void setWeights(unsigned row, std::vector<double> w);
-	void randomizeWeights();
+    std::vector<InputNode*> getWeightNodes();
+    std::vector<Node*> getOutputNodes();
+    InputNode* getBiasNode();
+    void setWeights(unsigned row, std::vector<double> w);
+    void randomizeWeights();
+    void printWeights();
 
 protected:
-	std::vector<Node*> m_inputs;
-	size_t numOutputs, numInputs;
-	NodeSet<InputNode> weights;
-	InputNode bias;
-	std::shared_ptr<VectorMultNode[]> vectorNodes;
+    std::vector<Node*> m_inputs;
+    size_t numOutputs, numInputs;
+    NodeSet<InputNode> weights;
+    InputNode bias;
+    std::shared_ptr<VectorMultNode[]> vectorNodes;
 };
 
 template<typename ActivationNodeT>

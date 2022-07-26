@@ -236,8 +236,8 @@ void Graph::traverse()
 			else
 			{
 				// pretty sure this is unreachable with current architecture & declarative flow
-				// as such its kind of untested, but in theory it should work				
-				std::cout << "traverse had to sort!" << std::endl;
+				// as such its kind of untested, but in theory it should work
+				// std::cout << "traverse had to sort!" << std::endl;
 
 				// move the ready nodes to the front of the queue
 				std::sort(q.begin(), q.end(), nodeReadyFwd);

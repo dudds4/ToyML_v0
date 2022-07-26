@@ -13,20 +13,27 @@ struct BatchOptimizer
 {
 	typedef OptimT<LossT> OptimizerT;
 
-	void setGraph(Graph *g) { 
+	void setGraph(Graph *g) {
 		graph = g;
 		nParams = graph->paramNodes.size();
 		paramDerivs.resize(nParams);
 	}
 
 	void setTrainingSet(double* in, double* out, unsigned n)
-	{ 
+	{
 		inputs = in;
 		outputs = out;
 		setSize = n;
 	}
 
-	void runEpochs(unsigned iterations) { for(int i = 0; i < iterations; ++i) runEpoch(); }
+	void runEpochs(unsigned iterations) {
+        for(int i = 0; i < iterations; ++i) {
+            if((epochsRuns + 1) % decayFrequency == 0) {
+                setLearningRate(learningRate * learningRateDecay);
+            }
+            runEpoch();
+        }
+    }
 
 	void updateParamsInterface() { static_cast<OptimizerT*>(this)->updateParams(); }
 
@@ -58,9 +65,6 @@ struct BatchOptimizer
 
 		}
 
-		if(overallError > lastOverallError)
-			learningRate /= 2;
-
 		lastOverallError = overallError;
 
 		// gradient clipping
@@ -75,24 +79,37 @@ struct BatchOptimizer
 
 		// update params
 		updateParamsInterface();
+
+        epochsRuns++;
 	}
 
 	void setGradientClipping(double maxGrad=-1) { maxGradient = maxGrad; }
-	void setLearningRate(double r) { learningRate = r; } 
-	double getLearningRate() { return learningRate; } 
+
+	void setLearningRate(double r) { learningRate = r; }
+	double getLearningRate() { return learningRate; }
+
+	void setLearningRateDecay(double r) { learningRateDecay = r; }
+	double getLearningRateDecay() { return learningRateDecay; }
+
+	void setDecayFrequency(unsigned x) { decayFrequency = x; }
+	double getDecayFrequency() { return decayFrequency; }
+
 
 protected:
-	Graph *graph;
-	double* inputs; 
-	double* outputs;
-	unsigned setSize;
+    Graph *graph;
+    double* inputs;
+    double* outputs;
+    unsigned setSize;
 
-	double lastOverallError = 0;
-	double learningRate = 0.2;
-	double maxGradient = -1;
+    double lastOverallError = 0;
+    double learningRate = 0.2;
+    double learningRateDecay = 0.5;
+    unsigned decayFrequency = 100;
+    unsigned epochsRuns = 0;
+    double maxGradient = -1;
 
-	std::vector<double> paramDerivs;
-	unsigned nParams;
+    std::vector<double> paramDerivs;
+    unsigned nParams;
 };
 
 
